@@ -175,17 +175,34 @@
         </div>
       </div>
 
-      <!-- Microphone toggle button inside overlay -->
-      <div class="overlay-mic-controls">
-        <button class="overlay-mic-btn listening" id="overlay-mic-toggle">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-          </svg>
-        </button>
-        <span class="overlay-mic-hint">बोलने के लिए टैप करें</span>
-      </div>
+     <!-- Concentric-ring microphone control -->
+<div class="overlay-mic-controls">
+  <div class="rk-mic-zone">
+    <div class="rk-ring r3"></div>
+    <div class="rk-ring r2"></div>
+    <div class="rk-ring r1"></div>
+
+    <button
+      class="rk-mic listening"
+      id="overlay-mic-toggle"
+      aria-label="Voice input"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+        <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M9 22h6"/>
+      </svg>
+    </button>
+  </div>
+
+  <span class="overlay-mic-hint">बोलने के लिए टैप करें</span>
+</div>
 
       <button class="voice-done-btn" id="voice-done-btn">हो गया (Done)</button>
     </div>
