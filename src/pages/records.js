@@ -1,211 +1,258 @@
-/* =============================================
-   RAMU KAKA — Records Page
-   ============================================= */
+/* =======================================================
+   RAMU KAKA — 05: Records View (Calendar + Activity Heatmap)
+   Section 14 of Master Vibe-Coding Prompt
+   ======================================================= */
 
-import { t, getLang } from '../i18n/translations.js';
-import { farmRecords, crops } from '../data/mock-data.js';
-import { navigateTo, showToast, showModal, closeModal } from '../main.js';
+import { farmRecordsData } from '../data/mock-data.js';
+import { getLanguage, t } from '../i18n/translations.js';
+import { voiceOverlay } from '../components/voice-overlay.js';
 
-export function renderRecords(container) {
-  const lang = getLang();
-  const allRecords = [...farmRecords, ...(window.RK.records || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+let activeDay = 16;
+let activities = [...farmRecordsData.activitiesForDay];
 
-  const typeConfig = {
-    planting: { emoji: '🌱', color: '#4CAF50', label: t('records.planting') },
-    spraying: { emoji: '💨', color: '#FF5722', label: t('records.spraying') },
-    fertilizer: { emoji: '🧪', color: '#FF9800', label: t('records.fertilizer') },
-    irrigation: { emoji: '💧', color: '#2196F3', label: t('records.irrigation') },
-    harvest: { emoji: '🌾', color: '#795548', label: t('records.harvest') }
-  };
-
-  // Calculate total cost
-  const totalCost = allRecords.reduce((sum, r) => sum + (r.cost || 0), 0);
+export function renderRecordsView(container) {
+  const lang = getLanguage();
+  const data = farmRecordsData;
 
   container.innerHTML = `
-    <div class="page-back" id="records-back">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      ${t('common.back')}
-    </div>
-
-    <div class="section-header">
-      <h3 class="section-title">${t('records.title')}</h3>
-    </div>
-
-    <!-- Summary Stats -->
-    <div class="field-stats" style="margin-bottom:var(--space-4);">
-      <div class="field-stat">
-        <div class="field-stat__value">${allRecords.length}</div>
-        <div class="field-stat__label">${lang === 'hi' ? 'कुल रिकॉर्ड' : 'Total Records'}</div>
-      </div>
-      <div class="field-stat">
-        <div class="field-stat__value" style="color:var(--color-danger);">₹${totalCost.toLocaleString('en-IN')}</div>
-        <div class="field-stat__label">${lang === 'hi' ? 'कुल खर्च' : 'Total Cost'}</div>
-      </div>
-    </div>
-
-    <!-- Filter Chips -->
-    <div class="category-filter" style="margin-bottom:var(--space-4);">
-      <button class="chip active" data-type-filter="all">${lang === 'hi' ? 'सभी' : 'All'}</button>
-      ${Object.entries(typeConfig).map(([key, config]) => `
-        <button class="chip" data-type-filter="${key}">${config.emoji} ${config.label}</button>
-      `).join('')}
-    </div>
-
-    <!-- Cost Chart -->
-    <div class="card" style="margin-bottom:var(--space-4);">
-      <div class="card__header">
-        <span class="card__title">${lang === 'hi' ? '📊 खर्च सारांश' : '📊 Cost Summary'}</span>
-      </div>
-      <div class="chart-container"><canvas id="records-chart"></canvas></div>
-    </div>
-
-    <!-- Timeline -->
-    <div class="record-timeline" id="records-list">
-      ${allRecords.length === 0 ? `
-        <div class="empty-state">
-          <div class="empty-state__icon">📝</div>
-          <div class="empty-state__title">${t('records.noRecords')}</div>
-          <div class="empty-state__desc">${t('records.startTracking')}</div>
+    <div class="records-view-container">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <h2>${lang === 'hi' ? 'खेत रिकॉर्ड डायरी' : 'Farm Records & Diary'}</h2>
+          <p style="font-size:var(--text-xs);color:var(--color-text-secondary);">
+            ${data.activeMonth}
+          </p>
         </div>
-      ` : allRecords.map(r => {
-        const config = typeConfig[r.type] || typeConfig.planting;
-        const crop = crops.find(c => c.id === r.crop);
-        return `
-          <div class="record-item" data-record-type="${r.type}">
-            <div class="record-item__dot" style="background:${config.color};"></div>
-            <div class="record-item__date">${config.emoji} ${new Date(r.date).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-            <div class="record-item__type">${config.label} — ${crop?.emoji || ''} ${lang === 'hi' ? crop?.hi || '' : crop?.en || ''}</div>
-            <div class="record-item__details">${r.details}</div>
-            ${r.cost ? `<div style="margin-top:4px;font-size:var(--text-sm);font-weight:var(--font-semibold);color:var(--color-danger);">💰 ₹${r.cost.toLocaleString('en-IN')}</div>` : ''}
-          </div>
-        `;
-      }).join('')}
-    </div>
+        <button class="btn-action-primary" style="font-size:0.8rem;padding:6px 14px;" id="btn-add-activity">
+          ${t('addActivity')}
+        </button>
+      </div>
 
-    <!-- Add Record FAB -->
-    <button class="fab" id="add-record-fab">+</button>
+      <!-- MONTH CALENDAR CARD (Section 14) -->
+      <div class="calendar-card">
+        <div class="calendar-header">
+          <span style="font-family:var(--font-heading);font-weight:bold;font-size:var(--text-base);">
+            📅 ${lang === 'hi' ? 'अगस्त 2026' : 'August 2026'}
+          </span>
+          <span style="font-size:0.75rem;color:var(--color-turmeric-dark);font-weight:bold;">
+            ● = ${lang === 'hi' ? 'गतिविधि दर्ज' : 'Activity Recorded'}
+          </span>
+        </div>
+
+        <div class="calendar-grid">
+          <div class="calendar-day-header">सोम (M)</div>
+          <div class="calendar-day-header">मंगल (T)</div>
+          <div class="calendar-day-header">बुध (W)</div>
+          <div class="calendar-day-header">गुरु (T)</div>
+          <div class="calendar-day-header">शुक्र (F)</div>
+          <div class="calendar-day-header">शनि (S)</div>
+          <div class="calendar-day-header">रवि (S)</div>
+
+          <!-- Blank offset days -->
+          <div class="calendar-cell" style="opacity:0.3;">28</div>
+          <div class="calendar-cell" style="opacity:0.3;">29</div>
+          <div class="calendar-cell" style="opacity:0.3;">30</div>
+          <div class="calendar-cell" style="opacity:0.3;">31</div>
+
+          <!-- August Days 1 to 31 -->
+          ${Array.from({ length: 31 }, (_, i) => {
+            const dayNum = i + 1;
+            const hasActivity = [1, 8, 12, 16].includes(dayNum);
+            const isSelected = dayNum === activeDay;
+            return `
+              <div class="calendar-cell ${isSelected ? 'active-day' : ''}" data-day="${dayNum}">
+                <span>${dayNum}</span>
+                ${hasActivity ? '<span class="calendar-dot"></span>' : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- GITHUB-STYLE ACTIVITY HEATMAP (Section 14) -->
+      <div class="heatmap-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--font-heading);font-weight:bold;font-size:var(--text-xs);color:var(--color-text-secondary);text-transform:uppercase;">
+            🌱 ${lang === 'hi' ? 'खेती प्रबंधन निरंतरता (Farm Consistency Heatmap)' : 'Activity Heatmap'}
+          </span>
+          <div style="display:flex;gap:3px;align-items:center;font-size:0.65rem;color:var(--color-text-muted);">
+            <span>कम</span>
+            <div style="width:8px;height:8px;background:#C8E6C9;border-radius:2px;"></div>
+            <div style="width:8px;height:8px;background:#81C784;border-radius:2px;"></div>
+            <div style="width:8px;height:8px;background:#388E3C;border-radius:2px;"></div>
+            <span>अधिक</span>
+          </div>
+        </div>
+
+        <div class="heatmap-grid">
+          ${data.heatmapMatrix.flat().map(lvl => `
+            <div class="heatmap-cell ${lvl > 0 ? `lvl-${lvl}` : ''}"></div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- SELECTED DAY'S ACTIVITIES LIST -->
+      <div class="day-activities-list">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-family:var(--font-heading);font-weight:bold;font-size:var(--text-base);">
+            📌 ${activeDay} ${lang === 'hi' ? 'अगस्त 2026 की गतिविधियां' : 'August 2026 Activities'}
+          </span>
+          <button class="btn-why" style="font-size:0.75rem;" id="btn-voice-log-activity">
+            🎙️ बोलकर दर्ज करें
+          </button>
+        </div>
+
+        <div id="day-activities-container">
+          ${renderActivityItems(activeDay)}
+        </div>
+      </div>
+    </div>
   `;
 
-  // Back navigation
-  document.getElementById('records-back').addEventListener('click', () => navigateTo('more'));
+  setupRecordsListeners(container);
+}
 
-  // Filter
-  container.querySelectorAll('[data-type-filter]').forEach(chip => {
-    chip.addEventListener('click', () => {
-      container.querySelectorAll('[data-type-filter]').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const filter = chip.dataset.typeFilter;
-      container.querySelectorAll('.record-item').forEach(item => {
-        item.style.display = (filter === 'all' || item.dataset.recordType === filter) ? '' : 'none';
-      });
+function renderActivityItems(day) {
+  const lang = getLanguage();
+  if (day === 16) {
+    return activities.map(a => `
+      <div class="activity-item">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.3rem;">${a.icon}</span>
+          <div>
+            <div style="font-weight:bold;font-size:0.9rem;">${a.title}</div>
+            <div style="font-size:0.75rem;color:var(--color-text-secondary);">${a.details}</div>
+          </div>
+        </div>
+        <span style="color:var(--color-healthy-green);font-weight:bold;font-size:0.8rem;">✓ पूर्ण</span>
+      </div>
+    `).join('');
+  } else if (day === 12) {
+    return `
+      <div class="activity-item">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.3rem;">💨</span>
+          <div>
+            <div style="font-weight:bold;font-size:0.9rem;">जैविक नीम छिड़काव (Neem Spray)</div>
+            <div style="font-size:0.75rem;color:var(--color-text-secondary);">खेत 2 (टमाटर) में 2 लीटर नीम घोल छिड़का</div>
+          </div>
+        </div>
+        <span style="color:var(--color-healthy-green);font-weight:bold;font-size:0.8rem;">✓ पूर्ण</span>
+      </div>
+    `;
+  } else if (day === 8) {
+    return `
+      <div class="activity-item">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.3rem;">💧</span>
+          <div>
+            <div style="font-weight:bold;font-size:0.9rem;">हल्की सिंचाई (Irrigation)</div>
+            <div style="font-size:0.75rem;color:var(--color-text-secondary);">खेत 1 (धान) में 3 सेमी जल स्तर किया</div>
+          </div>
+        </div>
+        <span style="color:var(--color-healthy-green);font-weight:bold;font-size:0.8rem;">✓ पूर्ण</span>
+      </div>
+    `;
+  } else {
+    return `
+      <div style="text-align:center;padding:16px 0;color:var(--color-text-muted);font-size:0.85rem;">
+        ${lang === 'hi' ? 'इस दिन कोई गतिविधि दर्ज नहीं है।' : 'No activity logged for this day.'}
+      </div>
+    `;
+  }
+}
+
+function setupRecordsListeners(container) {
+  // Calendar day clicking
+  container.querySelectorAll('.calendar-cell[data-day]').forEach(cell => {
+    cell.addEventListener('click', () => {
+      container.querySelectorAll('.calendar-cell').forEach(c => c.classList.remove('active-day'));
+      cell.classList.add('active-day');
+      activeDay = parseInt(cell.dataset.day);
+      const listContainer = document.getElementById('day-activities-container');
+      if (listContainer) listContainer.innerHTML = renderActivityItems(activeDay);
     });
   });
 
-  // Add Record
-  document.getElementById('add-record-fab').addEventListener('click', () => showAddRecordModal(container));
+  // Add activity button
+  document.getElementById('btn-add-activity')?.addEventListener('click', () => {
+    openAddActivityModal();
+  });
 
-  // Chart
-  setTimeout(() => initRecordsChart(allRecords, typeConfig), 100);
-}
-
-function initRecordsChart(records, typeConfig) {
-  const canvas = document.getElementById('records-chart');
-  if (!canvas || typeof Chart === 'undefined') return;
-
-  const lang = getLang();
-  const costByType = {};
-  Object.keys(typeConfig).forEach(key => { costByType[key] = 0; });
-  records.forEach(r => { costByType[r.type] = (costByType[r.type] || 0) + (r.cost || 0); });
-
-  window.RK.charts['records'] = new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(costByType).map(k => typeConfig[k]?.label || k),
-      datasets: [{
-        data: Object.values(costByType),
-        backgroundColor: Object.keys(costByType).map(k => typeConfig[k]?.color || '#ccc'),
-        borderWidth: 2,
-        borderColor: '#fff'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 10 }, usePointStyle: true, padding: 10 } }
-      },
-      cutout: '60%'
-    }
+  // Voice log
+  document.getElementById('btn-voice-log-activity')?.addEventListener('click', () => {
+    voiceOverlay.show('records');
   });
 }
 
-function showAddRecordModal(container) {
-  const lang = getLang();
+function openAddActivityModal() {
+  const modal = document.getElementById('modal-container');
+  const lang = getLanguage();
+  if (!modal) return;
 
-  showModal(`
-    <div class="modal__title">${t('records.addRecord')}</div>
+  modal.classList.remove('hidden');
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h3 style="font-size:var(--text-lg);font-weight:bold;">
+          📝 ${lang === 'hi' ? 'नई गतिविधि दर्ज करें' : 'Log New Activity'}
+        </h3>
+        <button id="close-modal-x" style="font-size:1.2rem;color:var(--color-text-muted);">✕</button>
+      </div>
 
-    <div class="input-group">
-      <label class="input-group__label">${lang === 'hi' ? 'प्रकार' : 'Type'}</label>
-      <select class="input-group__field" id="record-type" style="background:var(--color-surface);">
-        <option value="planting">${lang === 'hi' ? '🌱 बुवाई' : '🌱 Planting'}</option>
-        <option value="spraying">${lang === 'hi' ? '💨 छिड़काव' : '💨 Spraying'}</option>
-        <option value="fertilizer">${lang === 'hi' ? '🧪 खाद' : '🧪 Fertilizer'}</option>
-        <option value="irrigation">${lang === 'hi' ? '💧 सिंचाई' : '💧 Irrigation'}</option>
-        <option value="harvest">${lang === 'hi' ? '🌾 कटाई' : '🌾 Harvest'}</option>
-      </select>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <label style="font-size:0.8rem;font-weight:bold;color:var(--color-text-secondary);display:block;margin-bottom:4px;">
+            ${lang === 'hi' ? 'गतिविधि प्रकार' : 'Activity Type'}
+          </label>
+          <select id="modal-activity-type" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:white;">
+            <option value="fertilizer">🧪 उर्वरक / खाद (Fertilizer)</option>
+            <option value="spraying">💨 कीटनाशक छिड़काव (Spraying)</option>
+            <option value="irrigation">💧 सिंचाई (Irrigation)</option>
+            <option value="inspection">🔍 खेत निरीक्षण (Inspection)</option>
+            <option value="harvesting">🌾 कटाई (Harvesting)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size:0.8rem;font-weight:bold;color:var(--color-text-secondary);display:block;margin-bottom:4px;">
+            ${lang === 'hi' ? 'खेत चुनें' : 'Select Field'}
+          </label>
+          <select id="modal-field-select" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:white;">
+            <option value="field-1">खेत 1 · धान (PRH-10)</option>
+            <option value="field-2">खेत 2 · टमाटर (अर्का रक्षक)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size:0.8rem;font-weight:bold;color:var(--color-text-secondary);display:block;margin-bottom:4px;">
+            ${lang === 'hi' ? 'विवरण व मात्रा (उदा. 20 किग्रा यूरिया)' : 'Details & Quantity'}
+          </label>
+          <input type="text" id="modal-activity-details" placeholder="${lang === 'hi' ? 'उदा. 20 किग्रा यूरिया डाला' : 'e.g. Applied 20kg Urea'}" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:white;" />
+        </div>
+
+        <button class="btn-action-primary" style="width:100%;padding:10px;margin-top:6px;" id="modal-submit-activity">
+          ✓ ${lang === 'hi' ? 'रिकॉर्ड सहेजें' : 'Save Record'}
+        </button>
+      </div>
     </div>
+  `;
 
-    <div class="input-group">
-      <label class="input-group__label">${t('records.date')}</label>
-      <input type="date" class="input-group__field" id="record-date" value="${new Date().toISOString().split('T')[0]}" style="background:var(--color-surface);" />
-    </div>
-
-    <div class="input-group">
-      <label class="input-group__label">${t('records.crop')}</label>
-      <select class="input-group__field" id="record-crop" style="background:var(--color-surface);">
-        ${crops.map(c => `<option value="${c.id}">${c.emoji} ${lang === 'hi' ? c.hi : c.en}</option>`).join('')}
-      </select>
-    </div>
-
-    <div class="input-group">
-      <label class="input-group__label">${t('records.field')}</label>
-      <input type="text" class="input-group__field" id="record-field" placeholder="${lang === 'hi' ? 'खेत #1' : 'Field #1'}" value="${lang === 'hi' ? 'खेत #1' : 'Field #1'}" />
-    </div>
-
-    <div class="input-group">
-      <label class="input-group__label">${t('records.details')}</label>
-      <textarea class="input-group__field" id="record-details" rows="3" placeholder="${lang === 'hi' ? 'विवरण लिखें...' : 'Enter details...'}"></textarea>
-    </div>
-
-    <div class="input-group">
-      <label class="input-group__label">${t('records.cost')} (₹)</label>
-      <input type="number" class="input-group__field" id="record-cost" placeholder="${lang === 'hi' ? 'उदा: 500' : 'e.g. 500'}" />
-    </div>
-
-    <div style="display:flex;gap:var(--space-2);margin-top:var(--space-4);">
-      <button class="btn btn--primary btn--block" id="save-record-btn">${t('records.save')}</button>
-      <button class="btn btn--outline" id="cancel-record-btn">${t('common.cancel')}</button>
-    </div>
-  `);
-
-  document.getElementById('save-record-btn').addEventListener('click', () => {
-    const newRecord = {
-      id: Date.now(),
-      type: document.getElementById('record-type').value,
-      crop: document.getElementById('record-crop').value,
-      field: document.getElementById('record-field').value,
-      date: document.getElementById('record-date').value,
-      details: document.getElementById('record-details').value || (lang === 'hi' ? 'रिकॉर्ड जोड़ा गया' : 'Record added'),
-      cost: parseInt(document.getElementById('record-cost').value) || 0
-    };
-
-    window.RK.records.push(newRecord);
-    localStorage.setItem('rk-records', JSON.stringify(window.RK.records));
-    closeModal();
-    showToast(lang === 'hi' ? '✅ रिकॉर्ड सहेजा गया!' : '✅ Record saved!', 'success');
-    renderRecords(container);
+  document.getElementById('close-modal-x')?.addEventListener('click', () => {
+    modal.classList.add('hidden');
   });
 
-  document.getElementById('cancel-record-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-submit-activity')?.addEventListener('click', () => {
+    const details = document.getElementById('modal-activity-details')?.value || (lang === 'hi' ? 'नया कार्य संपन्न' : 'Completed task');
+    activities.unshift({
+      id: `a-${Date.now()}`,
+      type: 'custom',
+      icon: '🌱',
+      title: lang === 'hi' ? 'नया कार्य (Logged Activity)' : 'Activity',
+      details
+    });
+    modal.classList.add('hidden');
+    const list = document.getElementById('day-activities-container');
+    if (list) list.innerHTML = renderActivityItems(16);
+  });
 }

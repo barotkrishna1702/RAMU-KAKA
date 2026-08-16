@@ -2,13 +2,13 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>रामू काका — आपका खेती साथी | AI Farming Assistant</title>
-  <meta name="description" content="रामू काका — भारतीय किसानों के लिए AI-संचालित, वॉयस-फर्स्ट कृषि वेब ऐप। फसल स्वास्थ्य, मंडी भाव, रोग पहचान, और बहुत कुछ।" />
-  <meta name="theme-color" content="#2D5016" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>रामू काका — आपका AI खेती साथी | Ramu Kaka Farm Companion</title>
+  <meta name="description" content="भारतीय किसानों के लिए मैप-फर्स्ट AI कृषि साथी। फसल स्वास्थ्य, रोग पहचान, मंडी भाव, और रिकॉर्ड।" />
+  <meta name="theme-color" content="#1E3F20" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hind:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="/src/styles/variables.css" />
   <link rel="stylesheet" href="/src/styles/base.css" />
@@ -16,70 +16,186 @@
   <link rel="stylesheet" href="/src/styles/pages.css" />
 </head>
 <body>
-  <!-- App Shell -->
-  <div id="app">
-    <!-- Top Bar -->
-    <header id="top-bar" class="top-bar">
-      <div class="top-bar__brand">
-        <div class="top-bar__avatar">रा</div>
-        <div class="top-bar__info">
-          <h1 class="top-bar__title">रामू काका</h1>
-          <p class="top-bar__subtitle" data-i18n="tagline">आपका खेती साथी</p>
+  <div id="app" class="app-layout">
+    <!-- Desktop Persistent Sidebar -->
+    <aside class="desktop-sidebar" id="desktop-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-avatar">रा</div>
+        <div class="brand-text">
+          <h1 class="brand-title">रामू काका</h1>
+          <p class="brand-sub" data-i18n="tagline">खेती का साथी</p>
         </div>
       </div>
-      <button id="lang-switcher-btn" class="lang-switcher" aria-label="Change language">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <span id="current-lang-label">हिंदी</span>
-      </button>
-      <!-- Language Dropdown -->
-      <div id="lang-dropdown" class="lang-dropdown hidden">
-        <button class="lang-option active" data-lang="hi">हिंदी</button>
-        <button class="lang-option" data-lang="en">English</button>
-        <button class="lang-option" data-lang="mr">मराठी</button>
-        <button class="lang-option" data-lang="te">తెలుగు</button>
-        <button class="lang-option" data-lang="pa">ਪੰਜਾਬੀ</button>
-        <button class="lang-option" data-lang="ta">தமிழ்</button>
-      </div>
-    </header>
 
-    <!-- Page Container -->
-    <main id="page-container" class="page-container">
-      <!-- Pages rendered here by router -->
-    </main>
+      <!-- Navigation Items (Exact 5 Destinations) -->
+      <nav class="sidebar-nav">
+        <button class="sidebar-nav-item active" data-nav="farm">
+          <span class="nav-icon">🗺️</span>
+          <span class="nav-label" data-i18n="nav.farm">खेत (Farm)</span>
+        </button>
+        <button class="sidebar-nav-item" data-nav="crop">
+          <span class="nav-icon">📷</span>
+          <span class="nav-label" data-i18n="nav.crop">फसल / रोग (Crop)</span>
+        </button>
+        <button class="sidebar-nav-item sidebar-ramu-btn" id="desktop-ramu-btn" data-nav="ramu">
+          <div class="sidebar-ramu-pulse"></div>
+          <span class="nav-icon">🎙️</span>
+          <span class="nav-label font-bold" data-i18n="nav.ramu">रामू काका (AI)</span>
+        </button>
+        <button class="sidebar-nav-item" data-nav="market">
+          <span class="nav-icon">🛒</span>
+          <span class="nav-label" data-i18n="nav.market">बाज़ार (Buy/Sell)</span>
+        </button>
+        <button class="sidebar-nav-item" data-nav="records">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label" data-i18n="nav.records">रिकॉर्ड (Records)</span>
+        </button>
+      </nav>
 
-    <!-- Bottom Navigation -->
-    <nav id="bottom-nav" class="bottom-nav">
-      <button class="nav-item active" data-page="home" id="nav-home">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span data-i18n="nav.home">होम</span>
-      </button>
-      <button class="nav-item" data-page="field" id="nav-field">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        <span data-i18n="nav.field">खेत</span>
-      </button>
-      <button class="nav-item nav-item--scan" data-page="scan" id="nav-scan">
-        <div class="scan-btn-ring">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <!-- Sidebar Footer / Lang Switcher -->
+      <div class="sidebar-footer">
+        <div class="farmer-pill">
+          <span class="farmer-icon">👨‍🌾</span>
+          <div class="farmer-info">
+            <span class="farmer-name">राजेश पटेल</span>
+            <span class="farmer-meta">3.5 एकड़ · 2 खेत</span>
+          </div>
         </div>
-        <span data-i18n="nav.scan">स्कैन</span>
-      </button>
-      <button class="nav-item" data-page="market" id="nav-market">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        <span data-i18n="nav.market">बाज़ार</span>
-      </button>
-      <button class="nav-item" data-page="more" id="nav-more">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-        <span data-i18n="nav.more">और</span>
-      </button>
-    </nav>
+        <button class="lang-toggle-btn" id="lang-btn-desktop">
+          <span>🌐</span>
+          <span id="current-lang-desktop">हिंदी</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="main-wrapper">
+      <!-- Mobile Top Header -->
+      <header class="mobile-top-bar" id="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-avatar-sm">रा</div>
+          <div class="mobile-brand-meta">
+            <span class="mobile-app-title">रामू काका</span>
+            <span class="mobile-farm-tag" id="mobile-active-tag">राजेश का खेत · 3.5 एकड़</span>
+          </div>
+        </div>
+        <div class="mobile-header-actions">
+          <button class="lang-toggle-btn-sm" id="lang-btn-mobile">
+            <span>🌐</span>
+            <span id="current-lang-mobile">हिंदी</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic Page Container -->
+      <main id="page-container" class="page-viewport">
+        <!-- Content rendered dynamically by router -->
+      </main>
+
+      <!-- Mobile Persistent Bottom Navigation Tray (5 Destinations, Ramu in the center) -->
+      <nav class="mobile-bottom-tray" id="mobile-nav">
+        <button class="bottom-tray-item active" data-nav="farm" id="m-nav-farm">
+          <span class="tray-icon">🗺️</span>
+          <span class="tray-label" data-i18n="nav.farm">खेत</span>
+        </button>
+        <button class="bottom-tray-item" data-nav="crop" id="m-nav-crop">
+          <span class="tray-icon">📷</span>
+          <span class="tray-label" data-i18n="nav.crop">फसल</span>
+        </button>
+        <!-- Center Dominant Ramu Microphone -->
+        <button class="bottom-tray-ramu" id="mobile-ramu-btn" aria-label="Ask Ramu Kaka Voice">
+          <div class="ramu-mic-ring ramu-mic-ring-1"></div>
+          <div class="ramu-mic-ring ramu-mic-ring-2"></div>
+          <div class="ramu-mic-core">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </div>
+          <span class="ramu-tray-badge">रामू AI</span>
+        </button>
+        <button class="bottom-tray-item" data-nav="market" id="m-nav-market">
+          <span class="tray-icon">🛒</span>
+          <span class="tray-label" data-i18n="nav.market">बाज़ार</span>
+        </button>
+        <button class="bottom-tray-item" data-nav="records" id="m-nav-records">
+          <span class="tray-icon">📋</span>
+          <span class="tray-label" data-i18n="nav.records">रिकॉर्ड</span>
+        </button>
+      </nav>
+    </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Ramu Kaka Contextual Voice Overlay (Non-modal translucent layer over current screen) -->
+  <div id="ramu-voice-overlay" class="voice-overlay hidden" aria-modal="true" role="dialog">
+    <div class="voice-overlay-backdrop" id="voice-overlay-backdrop"></div>
+    <div class="voice-card">
+      <button class="voice-close-btn" id="voice-close-btn" aria-label="Close voice overlay">✕</button>
+      
+      <!-- Illustrated Ramu Avatar -->
+      <div class="ramu-avatar-container">
+        <div class="ramu-avatar-ring"></div>
+        <div class="ramu-avatar-illustration">
+          <span class="ramu-emoji">👨‍🌾</span>
+          <span class="ramu-turban-sparkle">✨</span>
+        </div>
+      </div>
+      
+      <div class="voice-status-heading" id="voice-status-text">सुन रहा हूँ... बोलिए</div>
+      <div class="voice-context-chip" id="voice-context-chip">📍 खेत 2 (धान) पर देख रहे हैं</div>
+
+      <!-- Animated Audio Waveform -->
+      <div class="waveform-container" id="waveform-container">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+
+      <!-- Live Transcript -->
+      <div class="voice-transcript-box" id="voice-transcript-box">
+        <span class="transcript-placeholder" id="transcript-text">"आज पानी देना चाहिए?" या "मेरी फसल कैसी है?"</span>
+      </div>
+
+      <!-- Short Actionable Response Box -->
+      <div class="voice-response-box hidden" id="voice-response-box">
+        <div class="response-header">
+          <span class="response-tag">💡 रामू का सुझाव</span>
+        </div>
+        <div class="response-body" id="voice-response-text">
+          आज पानी रोक दो। कल बारिश का चांस है।
+        </div>
+        <div class="response-actions" id="voice-response-actions">
+          <!-- Dynamic action buttons -->
+        </div>
+      </div>
+
+      <!-- Microphone toggle button inside overlay -->
+      <div class="overlay-mic-controls">
+        <button class="overlay-mic-btn listening" id="overlay-mic-toggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+          </svg>
+        </button>
+        <span class="overlay-mic-hint">बोलने के लिए टैप करें</span>
+      </div>
+
+      <button class="voice-done-btn" id="voice-done-btn">हो गया (Done)</button>
+    </div>
+  </div>
+
+  <!-- Toast & Universal Modal Containers -->
   <div id="toast-container" class="toast-container"></div>
+  <div id="modal-container" class="modal-overlay hidden"></div>
 
-  <!-- Modal Overlay -->
-  <div id="modal-overlay" class="modal-overlay hidden"></div>
-
+  <!-- External Libraries -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script type="module" src="/src/main.js"></script>

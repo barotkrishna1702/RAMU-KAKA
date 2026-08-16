@@ -1,18 +1,18 @@
 {
   "name": "ramu-kaka",
   "private": true,
-  "version": "1.0.0",
-  "description": "रामू काका — AI-powered voice-first agricultural web app for Indian farmers",
+  "version": "2.0.0",
+  "description": "रामू काका — Map-first AI farm companion for Indian farmers",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000 --host",
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server/index.js",
     "start": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "cors": "^2.8.5",
     "concurrently": "^8.2.2"
   },
