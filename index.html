@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>रामू काका — आपका खेती साथी | AI Farming Assistant</title>
+  <meta name="description" content="रामू काका — भारतीय किसानों के लिए AI-संचालित, वॉयस-फर्स्ट कृषि वेब ऐप। फसल स्वास्थ्य, मंडी भाव, रोग पहचान, और बहुत कुछ।" />
+  <meta name="theme-color" content="#2D5016" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/src/styles/variables.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/src/styles/components.css" />
+  <link rel="stylesheet" href="/src/styles/pages.css" />
+</head>
+<body>
+  <!-- App Shell -->
+  <div id="app">
+    <!-- Top Bar -->
+    <header id="top-bar" class="top-bar">
+      <div class="top-bar__brand">
+        <div class="top-bar__avatar">रा</div>
+        <div class="top-bar__info">
+          <h1 class="top-bar__title">रामू काका</h1>
+          <p class="top-bar__subtitle" data-i18n="tagline">आपका खेती साथी</p>
+        </div>
+      </div>
+      <button id="lang-switcher-btn" class="lang-switcher" aria-label="Change language">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="current-lang-label">हिंदी</span>
+      </button>
+      <!-- Language Dropdown -->
+      <div id="lang-dropdown" class="lang-dropdown hidden">
+        <button class="lang-option active" data-lang="hi">हिंदी</button>
+        <button class="lang-option" data-lang="en">English</button>
+        <button class="lang-option" data-lang="mr">मराठी</button>
+        <button class="lang-option" data-lang="te">తెలుగు</button>
+        <button class="lang-option" data-lang="pa">ਪੰਜਾਬੀ</button>
+        <button class="lang-option" data-lang="ta">தமிழ்</button>
+      </div>
+    </header>
+
+    <!-- Page Container -->
+    <main id="page-container" class="page-container">
+      <!-- Pages rendered here by router -->
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav" class="bottom-nav">
+      <button class="nav-item active" data-page="home" id="nav-home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span data-i18n="nav.home">होम</span>
+      </button>
+      <button class="nav-item" data-page="field" id="nav-field">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span data-i18n="nav.field">खेत</span>
+      </button>
+      <button class="nav-item nav-item--scan" data-page="scan" id="nav-scan">
+        <div class="scan-btn-ring">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <span data-i18n="nav.scan">स्कैन</span>
+      </button>
+      <button class="nav-item" data-page="market" id="nav-market">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span data-i18n="nav.market">बाज़ार</span>
+      </button>
+      <button class="nav-item" data-page="more" id="nav-more">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        <span data-i18n="nav.more">और</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Modal Overlay -->
+  <div id="modal-overlay" class="modal-overlay hidden"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
