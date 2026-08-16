@@ -145,20 +145,25 @@ class VoiceOverlayController {
     }
   }
 
-  updateListeningUI(listening) {
-    if (this.micToggle) {
-      if (listening) {
-        this.micToggle.classList.add('listening');
-      } else {
-        this.micToggle.classList.remove('listening');
-      }
-    }
-    if (this.statusText) {
-      this.statusText.textContent = listening 
-        ? (getLanguage() === 'hi' ? 'सुन रहा हूँ... बोलिए' : 'Listening... Speak now')
-        : (getLanguage() === 'hi' ? 'उत्तर तैयार है' : 'Response Ready');
+ updateListeningUI(listening) {
+  if (this.micToggle) {
+    this.micToggle.classList.toggle('listening', listening);
+
+    // The new concentric-ring microphone uses its parent
+    // zone to control the ring animation.
+    const micZone = this.micToggle.closest('.rk-mic-zone');
+
+    if (micZone) {
+      micZone.classList.toggle('listening', listening);
     }
   }
+
+  if (this.statusText) {
+    this.statusText.textContent = listening
+      ? (getLanguage() === 'hi' ? 'सुन रहा हूँ... बोलिए' : 'Listening... Speak now')
+      : (getLanguage() === 'hi' ? 'उत्तर तैयार है' : 'Response Ready');
+  }
+}
 
   resetResponse() {
     this.responseBox?.classList.add('hidden');
