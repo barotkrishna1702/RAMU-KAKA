@@ -347,6 +347,8 @@
   flex-wrap: wrap;
 }
 
+/* ── Concentric Ring Microphone ── */
+
 .overlay-mic-controls {
   display: flex;
   flex-direction: column;
@@ -355,29 +357,107 @@
   margin-bottom: 16px;
 }
 
-.overlay-mic-btn {
-  width: 60px;
-  height: 60px;
-  border-radius: var(--radius-pill);
-  background: var(--color-turmeric);
-  color: var(--color-primary-dark);
+.rk-mic-zone {
+  --ring-color: #D9BE8C;
+  --mic-idle: #1F4030;
+  --mic-active: #6FA85C;
+  --icon-color: #F1E7CC;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(229, 161, 28, 0.4);
+  position: relative;
+
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.rk-ring {
+  position: absolute;
+  border: 1.5px solid var(--ring-color);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.rk-ring.r1 {
+  width: 110px;
+  height: 110px;
+}
+
+.rk-ring.r2 {
+  width: 158px;
+  height: 158px;
+}
+
+.rk-ring.r3 {
+  width: 206px;
+  height: 206px;
+}
+
+.rk-mic {
+  position: relative;
+  z-index: 2;
+
+  width: 82px;
+  height: 82px;
+
+  border-radius: 50%;
+  border: none;
+
+  background: var(--mic-idle);
+  color: var(--icon-color);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 12px 26px rgba(19, 42, 31, 0.35);
+
   cursor: pointer;
-  transition: transform var(--transition-fast);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
-.overlay-mic-btn.listening {
-  background: var(--color-stress-red);
-  color: white;
-  animation: pulse-red 1.5s infinite;
+.rk-mic:hover {
+  transform: scale(1.04);
 }
 
-@keyframes pulse-red {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
-  50% { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(211, 47, 47, 0); }
+.rk-mic svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Listening state */
+.rk-mic.listening {
+  background: var(--mic-active);
+}
+
+/* Animated concentric rings */
+.rk-mic-zone.listening .rk-ring {
+  animation: rk-pulse 1.4s ease-out infinite;
+  border-color: var(--mic-active);
+}
+
+.rk-mic-zone.listening .rk-ring.r2 {
+  animation-delay: 0.25s;
+}
+
+.rk-mic-zone.listening .rk-ring.r3 {
+  animation-delay: 0.5s;
+}
+
+@keyframes rk-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
 }
 
 .overlay-mic-hint {
