@@ -213,6 +213,54 @@ function initSatelliteMap() {
       html: `<div style="background:rgba(211,47,47,0.9);color:white;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;border:1px solid #FF8A80;">🔴 ${f2.name} (टमाटर)</div>`
     })
   }).addTo(mapInstance);
+
+  // ── Draw User's Farm Boundary from Onboarding ──
+  const savedBoundary = localStorage.getItem('rk-farm-boundary');
+  if (savedBoundary) {
+    try {
+      const farmPoints = JSON.parse(savedBoundary);
+      if (Array.isArray(farmPoints) && farmPoints.length >= 3) {
+        // Draw the outer farm boundary
+        const farmBoundary = L.polygon(farmPoints, {
+          color: '#D9BE8C',
+          weight: 2.5,
+          fillColor: 'transparent',
+          fillOpacity: 0,
+          dashArray: '8, 6',
+          className: 'farm-boundary-outline'
+        }).addTo(mapInstance);
+
+        // Add corner pin markers
+        farmPoints.forEach((pt, idx) => {
+          L.marker(pt, {
+            icon: L.divIcon({
+              className: 'farm-corner-pin',
+              html: `<div style="width:18px;height:18px;border-radius:50%;background:#1F4030;border:2px solid #D9BE8C;display:flex;align-items:center;justify-content:center;font-size:9px;color:#F1E7CC;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${idx + 1}</div>`,
+              iconSize: [18, 18],
+              iconAnchor: [9, 9]
+            })
+          }).addTo(mapInstance);
+        });
+
+        // Add "My Farm" label at center of boundary
+        const bounds = farmBoundary.getBounds();
+        const center = bounds.getCenter();
+        const lang = getLanguage();
+        L.marker(center, {
+          icon: L.divIcon({
+            className: 'custom-map-label',
+            html: `<div style="background:rgba(31,64,48,0.85);color:#F1E7CC;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;border:1.5px solid #D9BE8C;">🏡 ${lang === 'hi' ? 'मेरा खेत' : 'My Farm'}</div>`,
+            iconAnchor: [40, -5]
+          })
+        }).addTo(mapInstance);
+
+        // Fit map to show the full farm boundary
+        mapInstance.fitBounds(bounds.pad(0.08), { maxZoom: 17 });
+      }
+    } catch (e) {
+      console.warn('Failed to parse farm boundary:', e);
+    }
+  }
 }
 
 function showFieldSheet(field) {

@@ -20,7 +20,7 @@
     <!-- Desktop Persistent Sidebar -->
     <aside class="desktop-sidebar" id="desktop-sidebar">
       <div class="sidebar-brand">
-        <div class="brand-avatar">रा</div>
+        <img src="/assets/ramu-kaka-logo.png" alt="रामू काका" class="brand-avatar-img" />
         <div class="brand-text">
           <h1 class="brand-title">रामू काका</h1>
           <p class="brand-sub" data-i18n="tagline">खेती का साथी</p>
@@ -73,7 +73,7 @@
       <!-- Mobile Top Header -->
       <header class="mobile-top-bar" id="mobile-header">
         <div class="mobile-brand">
-          <div class="brand-avatar-sm">रा</div>
+          <img src="/assets/ramu-kaka-logo.png" alt="रामू काका" class="brand-avatar-img-sm" />
           <div class="mobile-brand-meta">
             <span class="mobile-app-title">रामू काका</span>
             <span class="mobile-farm-tag" id="mobile-active-tag">राजेश का खेत · 3.5 एकड़</span>
@@ -102,19 +102,19 @@
           <span class="tray-icon">📷</span>
           <span class="tray-label" data-i18n="nav.crop">फसल</span>
         </button>
-        <!-- Center Dominant Ramu Microphone -->
+        <!-- Center Dominant Ramu Microphone (3 concentric rings + solid green button) -->
         <button class="bottom-tray-ramu" id="mobile-ramu-btn" aria-label="Ask Ramu Kaka Voice">
-          <div class="ramu-mic-ring ramu-mic-ring-1"></div>
+          <div class="ramu-mic-ring ramu-mic-ring-3"></div>
           <div class="ramu-mic-ring ramu-mic-ring-2"></div>
+          <div class="ramu-mic-ring ramu-mic-ring-1"></div>
           <div class="ramu-mic-core">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F1E7CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="1" width="6" height="12" rx="3" ry="3"/>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
               <line x1="12" y1="19" x2="12" y2="23"/>
               <line x1="8" y1="23" x2="16" y2="23"/>
             </svg>
           </div>
-          <span class="ramu-tray-badge">रामू AI</span>
         </button>
         <button class="bottom-tray-item" data-nav="market" id="m-nav-market">
           <span class="tray-icon">🛒</span>
@@ -138,8 +138,7 @@
       <div class="ramu-avatar-container">
         <div class="ramu-avatar-ring"></div>
         <div class="ramu-avatar-illustration">
-          <span class="ramu-emoji">👨‍🌾</span>
-          <span class="ramu-turban-sparkle">✨</span>
+          <img src="/assets/ramu-kaka-logo.png" alt="रामू काका" class="ramu-avatar-img" />
         </div>
       </div>
       
@@ -175,34 +174,18 @@
         </div>
       </div>
 
-     <!-- Concentric-ring microphone control -->
-<div class="overlay-mic-controls">
-  <div class="rk-mic-zone">
-    <div class="rk-ring r3"></div>
-    <div class="rk-ring r2"></div>
-    <div class="rk-ring r1"></div>
-
-    <button
-      class="rk-mic listening"
-      id="overlay-mic-toggle"
-      aria-label="Voice input"
-    >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-        <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M9 22h6"/>
-      </svg>
-    </button>
-  </div>
-
-  <span class="overlay-mic-hint">बोलने के लिए टैप करें</span>
-</div>
+      <!-- Microphone toggle button inside overlay -->
+      <div class="overlay-mic-controls">
+        <button class="overlay-mic-btn listening" id="overlay-mic-toggle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F1E7CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="1" width="6" height="12" rx="3" ry="3"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <span class="overlay-mic-hint">बोलने के लिए टैप करें</span>
+      </div>
 
       <button class="voice-done-btn" id="voice-done-btn">हो गया (Done)</button>
     </div>

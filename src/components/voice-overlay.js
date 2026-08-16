@@ -145,25 +145,20 @@ class VoiceOverlayController {
     }
   }
 
- updateListeningUI(listening) {
-  if (this.micToggle) {
-    this.micToggle.classList.toggle('listening', listening);
-
-    // The new concentric-ring microphone uses its parent
-    // zone to control the ring animation.
-    const micZone = this.micToggle.closest('.rk-mic-zone');
-
-    if (micZone) {
-      micZone.classList.toggle('listening', listening);
+  updateListeningUI(listening) {
+    if (this.micToggle) {
+      if (listening) {
+        this.micToggle.classList.add('listening');
+      } else {
+        this.micToggle.classList.remove('listening');
+      }
+    }
+    if (this.statusText) {
+      this.statusText.textContent = listening 
+        ? (getLanguage() === 'hi' ? 'सुन रहा हूँ... बोलिए' : 'Listening... Speak now')
+        : (getLanguage() === 'hi' ? 'उत्तर तैयार है' : 'Response Ready');
     }
   }
-
-  if (this.statusText) {
-    this.statusText.textContent = listening
-      ? (getLanguage() === 'hi' ? 'सुन रहा हूँ... बोलिए' : 'Listening... Speak now')
-      : (getLanguage() === 'hi' ? 'उत्तर तैयार है' : 'Response Ready');
-  }
-}
 
   resetResponse() {
     this.responseBox?.classList.add('hidden');
@@ -241,12 +236,78 @@ class VoiceOverlayController {
   }
 
   speak(text) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = getLanguage() === 'hi' ? 'hi-IN' : 'en-IN';
-      utterance.rate = 0.95;
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const isHindi = getLanguage() === 'hi';
+    const lang = isHindi ? 'hi-IN' : 'en-IN';
+    utterance.lang = lang;
+    utterance.rate = 0.92;
+    utterance.pitch = 0.8; // deep male pitch
+
+    // Known male voice names across platforms
+    const MALE_NAMES = [
+      'hemant', 'ravi', 'purus', 'madhur', 'kumar',   // Hindi male
+      'microsoft hemant', 'google हिन्दी',              // Windows/Chrome Hindi
+      'male', 'david', 'mark', 'james', 'rishi',       // English male
+      'microsoft david', 'microsoft mark', 'microsoft rishi'
+    ];
+
+    // Known female voice names to EXCLUDE
+    const FEMALE_NAMES = [
+      'kalpana', 'swara', 'heera', 'lekha', 'priya',   // Hindi female
+      'female', 'woman', 'zira', 'hazel', 'susan',     // English female
+      'microsoft zira', 'microsoft hazel'
+    ];
+
+    const isMaleVoice = (name) => {
+      const n = name.toLowerCase();
+      return MALE_NAMES.some(m => n.includes(m));
+    };
+
+    const isFemaleVoice = (name) => {
+      const n = name.toLowerCase();
+      return FEMALE_NAMES.some(f => n.includes(f));
+    };
+
+    const matchesLang = (v) => {
+      const vLang = v.lang.toLowerCase();
+      // Match hi, hi-IN, hi_IN for Hindi; en, en-IN, en_IN, en-US etc for English
+      return vLang.startsWith(isHindi ? 'hi' : 'en');
+    };
+
+    const pickMaleVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      // Log voices for debugging (check browser console)
+      console.log('🎙️ Ramu Kaka — Available voices:', voices.map(v => `${v.name} [${v.lang}]`));
+
+      // 1. Exact male voice in target language
+      const exactMale = voices.find(v => matchesLang(v) && isMaleVoice(v.name));
+
+      // 2. Any non-female voice in target language
+      const nonFemale = voices.find(v => matchesLang(v) && !isFemaleVoice(v.name));
+
+      // 3. Any voice in target language
+      const anyLang = voices.find(v => matchesLang(v));
+
+      // 4. Last resort — any male voice in any language
+      const anyMale = voices.find(v => isMaleVoice(v.name));
+
+      const chosen = exactMale || nonFemale || anyLang || anyMale || null;
+      if (chosen) {
+        utterance.voice = chosen;
+        console.log('🎙️ Ramu Kaka — Using voice:', chosen.name, `[${chosen.lang}]`);
+      }
       window.speechSynthesis.speak(utterance);
+    };
+
+    // Voices may load asynchronously
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+      pickMaleVoice();
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => pickMaleVoice();
     }
   }
 }

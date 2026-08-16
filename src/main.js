@@ -7,6 +7,7 @@ import { renderCropView } from './pages/crop.js';
 import { renderMarketView } from './pages/market.js';
 import { renderRecordsView } from './pages/records.js';
 import { voiceOverlay } from './components/voice-overlay.js';
+import { farmOnboarding } from './components/farm-onboarding.js';
 import { setLanguage, toggleLanguage, getLanguage } from './i18n/translations.js';
 
 class AppRouter {
@@ -91,4 +92,7 @@ window.RK_Router = new AppRouter();
 document.addEventListener('DOMContentLoaded', () => {
   setLanguage(getLanguage());
   window.RK_Router.init();
+
+  // Show farm onboarding on first visit
+  farmOnboarding.show();
 });
